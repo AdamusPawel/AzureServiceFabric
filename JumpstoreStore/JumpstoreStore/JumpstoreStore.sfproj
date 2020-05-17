@@ -32,6 +32,7 @@
     <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\CustomerAnalytics\CustomerAnalytics.csproj" />
     <ProjectReference Include="..\ProductCatalogue\ProductCatalogue.csproj" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />

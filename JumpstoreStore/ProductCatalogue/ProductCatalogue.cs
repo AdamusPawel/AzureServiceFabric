@@ -4,8 +4,10 @@ using System.Fabric;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Communication;
 using Microsoft.ServiceFabric.Data.Collections;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
 namespace ProductCatalogue
@@ -13,11 +15,19 @@ namespace ProductCatalogue
     /// <summary>
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
-    internal sealed class ProductCatalogue : StatefulService
+    internal sealed class ProductCatalogue : StatefulService, IStatefulService
     {
         public ProductCatalogue(StatefulServiceContext context)
             : base(context)
         { }
+
+        public async Task<string> GetServiceDetails()
+        {
+            var serviceName = this.Context.ServiceName.ToString();
+            var partition = this.Context.PartitionId.ToString();
+
+            return $"{serviceName} --- {partition}";
+        }
 
         /// <summary>
         /// Optional override to create listeners (e.g., HTTP, Service Remoting, WCF, etc.) for this service replica to handle client or user requests.
@@ -28,7 +38,7 @@ namespace ProductCatalogue
         /// <returns>A collection of listeners.</returns>
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return new ServiceReplicaListener[0];
+            return this.CreateServiceRemotingReplicaListeners();
         }
 
         /// <summary>
