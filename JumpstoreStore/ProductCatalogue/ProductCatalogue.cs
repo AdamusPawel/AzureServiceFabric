@@ -15,7 +15,7 @@ namespace ProductCatalogue
     /// <summary>
     /// An instance of this class is created for each service replica by the Service Fabric runtime.
     /// </summary>
-    internal sealed class ProductCatalogue : StatefulService, IStatefulService
+    internal sealed class ProductCatalogue : StatefulService, IStatefulInterface
     {
         public ProductCatalogue(StatefulServiceContext context)
             : base(context)

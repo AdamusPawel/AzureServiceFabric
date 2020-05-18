@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace Communication
 {
-    public interface IStatefulService : IService
+    public interface IStatefulInterface : IService
     {
         Task<string> GetServiceDetails();
     }
