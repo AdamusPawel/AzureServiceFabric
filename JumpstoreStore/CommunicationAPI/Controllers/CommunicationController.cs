@@ -27,12 +27,12 @@ namespace CommunicationAPI.Controllers
 
         [HttpGet]
         [Route("stateful")]
-        public async Task<string> StatefulGet([FromQuery] string region)
+        public async Task<string> StatefulGet([FromQuery] int productId)
         {
-            
+            var partitionId = productId % 3; // it will cause productId to be split betweeen partitions
             var statefulProxy = ServiceProxy.Create<IStatefulInterface>(
                 new Uri("fabric:/JumpstoreStore/ProductCatalogue"),
-                new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(region.ToUpperInvariant()));
+                new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(partitionId));
 
             var serviceName = await statefulProxy.GetServiceDetails();
 

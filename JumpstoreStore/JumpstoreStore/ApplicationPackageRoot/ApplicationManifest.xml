@@ -46,11 +46,7 @@
     </Service>
     <Service Name="ProductCatalogue" ServicePackageActivationMode="ExclusiveProcess">
       <StatefulService ServiceTypeName="ProductCatalogueType" TargetReplicaSetSize="[TargetReplicaSetSize]" MinReplicaSetSize="[MinReplicaSetSize]">
-        <NamedPartition>
-          <Partition Name="USA" />
-          <Partition Name="EU" />
-          <Partition Name="ASIA" />
-        </NamedPartition>
+        <UniformInt64Partition PartitionCount="3" LowKey="0" HighKey="2" />
       </StatefulService>
     </Service>
   </DefaultServices>
