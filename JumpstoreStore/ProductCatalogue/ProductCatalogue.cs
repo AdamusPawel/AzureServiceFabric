@@ -26,7 +26,7 @@ namespace ProductCatalogue
             var stateManager = this.StateManager; // StateManager is Azure Fabric thingy, allows us to manage state
             var productDict = await stateManager.GetOrAddAsync<IReliableDictionary<int, Product>>("productdict"); // - name (unique!) is for reliable dictionary which we will be called in State Manager
 
-            using (var transaction = StateManager.CreateTransaction())
+            using (var transaction = stateManager.CreateTransaction())
             {
                 var product = await productDict.TryGetValueAsync(transaction, id);  // try to get value of product from reliable dictionary
 
@@ -41,7 +41,7 @@ namespace ProductCatalogue
             var stateManager = this.StateManager; // StateManager is Azure Fabric thingy, allows us to manage state
             var productDict = await stateManager.GetOrAddAsync<IReliableDictionary<int, Product>>("productdict"); // - name (unique!) is for reliable dictionary which we will be called in State Manager
 
-            using (var transaction = StateManager.CreateTransaction())
+            using (var transaction = stateManager.CreateTransaction())
             {
                 await productDict.AddOrUpdateAsync(transaction, product.Id, product, (key, value) => value); // transaction of adding/updating product
 
