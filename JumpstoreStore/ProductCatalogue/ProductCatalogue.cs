@@ -1,4 +1,4 @@
-    using System;
+using System;
 using System.Collections.Generic;
 using System.Fabric;
 using System.Linq;
@@ -20,6 +20,34 @@ namespace ProductCatalogue
         public ProductCatalogue(StatefulServiceContext context)
             : base(context)
         { }
+
+        public async Task<Product> GetProductById(int id)
+        {
+            var stateManager = this.StateManager; // StateManager is Azure Fabric thingy, allows us to manage state
+            var productDict = await stateManager.GetOrAddAsync<IReliableDictionary<int, Product>>("productdict"); // - name (unique!) is for reliable dictionary which we will be called in State Manager
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                var product = await productDict.TryGetValueAsync(transaction, id);  // try to get value of product from reliable dictionary
+
+                return product.Value; // return value of product
+            }
+
+            throw new Exception(); // if fail, throw exception
+        }
+
+        public async Task AddProduct(Product product)
+        {
+            var stateManager = this.StateManager; // StateManager is Azure Fabric thingy, allows us to manage state
+            var productDict = await stateManager.GetOrAddAsync<IReliableDictionary<int, Product>>("productdict"); // - name (unique!) is for reliable dictionary which we will be called in State Manager
+
+            using (var transaction = StateManager.CreateTransaction())
+            {
+                await productDict.AddOrUpdateAsync(transaction, product.Id, product, (key, value) => value); // transaction of adding/updating product
+
+                await transaction.CommitAsync(); // complete the transaction
+            }
+        }
 
         public async Task<string> GetServiceDetails()
         {

@@ -7,5 +7,8 @@ namespace Communication
     public interface IStatefulInterface : IService
     {
         Task<string> GetServiceDetails();
+
+        Task<Product> GetProductById(int id);
+        Task AddProduct(Product product);
     }
 }

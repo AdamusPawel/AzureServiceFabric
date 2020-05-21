@@ -18,7 +18,7 @@ namespace CommunicationAPI.Controllers
         public async Task<string> StatelessGet()
         {
             var statelessProxy = ServiceProxy.Create<IStatelessInterface>(
-                new Uri("fabric:/JumpstoreStore/CustomerAnalytics"));
+                new Uri("fabric:/JumpstoreStore/CustomerAnalytics")); // ref to server's Uri
 
             var serviceName = await statelessProxy.GetServiceDetails();
 
@@ -37,6 +37,32 @@ namespace CommunicationAPI.Controllers
             var serviceName = await statefulProxy.GetServiceDetails();
 
             return serviceName;
+        }
+
+        [HttpPost] // we want  to post products
+        [Route("addproduct")]
+        public async Task AddProduct([FromQuery] Product product)
+        {
+            var partitionId = product.Id % 3; // we will split added products over partitions
+            var statefulProxy = ServiceProxy.Create<IStatefulInterface>(
+                new Uri("fabric:/JumpstoreStore/ProductCatalogue"),
+                new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(partitionId));
+
+            await statefulProxy.AddProduct(product); // this is void return so we just need to pass product to be added
+        }
+
+        [HttpGet]
+        [Route("getproduct")]
+        public async Task<Product> GetProduct([FromQuery] int productId)
+        {
+            var partitionId = productId % 3; // we generate partitionId in the same manner like in addproduct - so that guarantee we will be routed to correct partition
+            var statefulProxy = ServiceProxy.Create<IStatefulInterface>(
+                new Uri("fabric:/JumpstoreStore/ProductCatalogue"),
+                new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(partitionId));
+
+            var product = await statefulProxy.GetProductById(productId); // get product by id
+
+            return product; // return that product
         }
     }
 }
