@@ -21,6 +21,36 @@ namespace ProductCatalogue
             : base(context)
         { }
 
+        public async Task<Product> GetFromQueue()
+        {
+            var stateManager = this.StateManager;
+            var productQueue = await stateManager.GetOrAddAsync<IReliableQueue<Product>>("productqueue");
+
+            using (var transaction = stateManager.CreateTransaction())
+            {
+                var product = await productQueue.TryDequeueAsync(transaction);  // try to get value of product from reliable queue
+
+                await transaction.CommitAsync(); // complete the transaction + remove prod from transaction's queue
+
+                return product.Value; // return value of product
+            }
+
+            throw new ArgumentException(); // if fail, throw exception
+        }
+
+        public async Task AddToQueue(Product product)
+        {
+            var stateManager = this.StateManager;
+            var productQueue = await stateManager.GetOrAddAsync<IReliableQueue<Product>>("productqueue");
+
+            using (var transaction = stateManager.CreateTransaction())
+            {
+                await productQueue.EnqueueAsync(transaction, product);  // store product in reliable queue
+
+                await transaction.CommitAsync(); // complete the transaction
+            }
+        }
+
         public async Task<Product> GetProductById(int id)
         {
             var stateManager = this.StateManager; // StateManager is Azure Fabric thingy, allows us to manage state

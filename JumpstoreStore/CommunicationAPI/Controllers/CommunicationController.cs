@@ -41,7 +41,7 @@ namespace CommunicationAPI.Controllers
 
         [HttpPost] // we want  to post products
         [Route("addproduct")]
-        public async Task AddProduct([FromQuery] Product product)
+        public async Task AddProduct([FromBody] Product product)
         {
             var partitionId = product.Id % 3; // we will split added products over partitions
             var statefulProxy = ServiceProxy.Create<IStatefulInterface>(
@@ -51,7 +51,7 @@ namespace CommunicationAPI.Controllers
             await statefulProxy.AddProduct(product); // this is void return so we just need to pass product to be added
         }
 
-        [HttpGet]
+        [HttpGet] // we want  to get products
         [Route("getproduct")]
         public async Task<Product> GetProduct([FromQuery] int productId)
         {
@@ -60,7 +60,31 @@ namespace CommunicationAPI.Controllers
                 new Uri("fabric:/JumpstoreStore/ProductCatalogue"),
                 new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(partitionId));
 
-            var product = await statefulProxy.GetProductById(productId); // get product by id
+            var product = await statefulProxy.GetProductById(partitionId); // get product by id
+
+            return product; // return that product
+        }
+
+        [HttpPost] // we want  to post products
+        [Route("addtoqueue")]
+        public async Task AddToQueue([FromQuery] int partitionId, [FromBody] Product product)
+        {
+            var statefulProxy = ServiceProxy.Create<IStatefulInterface>(
+                new Uri("fabric:/JumpstoreStore/ProductCatalogue"),
+                new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(partitionId));
+
+            await statefulProxy.AddToQueue(product); // this is void return so we just need to pass product to be added
+        }
+
+        [HttpGet] // we want  to get products
+        [Route("getfromqueue")]
+        public async Task<Product> GetFromQueue([FromQuery] int partitionId)
+        {
+            var statefulProxy = ServiceProxy.Create<IStatefulInterface>(
+                new Uri("fabric:/JumpstoreStore/ProductCatalogue"),
+                new Microsoft.ServiceFabric.Services.Client.ServicePartitionKey(partitionId));
+
+            var product = await statefulProxy.GetFromQueue(); // get product by id
 
             return product; // return that product
         }
