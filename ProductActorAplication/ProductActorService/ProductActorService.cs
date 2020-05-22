@@ -12,7 +12,7 @@ using Contracts;
 namespace ProductActorService
 {
     [StatePersistence(StatePersistence.Persisted)]
-    internal class ProductActorService : Actor, IProductActorService
+    internal class ProductActorService : Actor, IProductActorService, IRemindable
     {
         private string ProductStateName = "ProductState";
 
@@ -25,7 +25,7 @@ namespace ProductActorService
 
         public async Task AddProductAsync(Product product, CancellationToken cancellationToken)
         {
-            await this.StateManager.AddOrUpdateStateAsync(ProductStateName, product, updateValueFactory:(key, value) => product, cancellationToken);
+            await this.StateManager.AddOrUpdateStateAsync(ProductStateName, product, updateValueFactory: (key, value) => product, cancellationToken);
 
             await this.StateManager.SaveStateAsync(cancellationToken);
         }
@@ -65,18 +65,19 @@ namespace ProductActorService
 
         protected override Task OnActivateAsync()
         {
-            _actorTimer = RegisterTimer(DoWork, null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)); // will trigger after 10 sec and then every 15 sec after that
+            this.RegisterReminderAsync("TaskReminder", null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)); // register reminder
 
             ActorEventSource.Current.ActorMessage(actor: this, message: "Actor activated.");
 
             return this.StateManager.TryAddStateAsync("count", value: 0);
         }
 
-        private Task DoWork(object work) // callback for our timer
+        public async Task ReceiveReminderAsync(string reminderName, byte[] state, TimeSpan duetime, TimeSpan period) // receive reminder
         {
-            ActorEventSource.Current.ActorMessage(actor: this, message: $"Actor is doing work");
-
-            return Task.CompletedTask;
+            if (reminderName == "TaskReminder")
+            {
+                ActorEventSource.Current.ActorMessage(actor: this, message: $"Reminder is doing work");
+            }
         }
     }
 }
