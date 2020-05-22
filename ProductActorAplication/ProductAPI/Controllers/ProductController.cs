@@ -32,5 +32,18 @@ namespace ProductAPI.Controllers
             var proxy = ActorProxy.Create<IProductActorService>(actorId, new Uri("fabric:/ProductActorAplication/ProductActorServiceActorService"));
             await proxy.AddProductAsync(product, new CancellationToken());
         }
+
+        [HttpDelete]
+        public async Task DeleteActorById([FromQuery] int id)
+        {
+            var actorId = new ActorId(id); // we're creating new Actor's Id
+
+            var actorServiceProxy = ActorServiceProxy.Create(new Uri("fabric:/ProductActorAplication/ProductActorServiceActorService"), actorId); // we're connecting to actor service, not actor itself
+
+            await actorServiceProxy.DeleteActorAsync(actorId, new CancellationToken()); // allows us to delete actor and state
+
+            // note: common use of this is when for example service proxy is on timer (e.g. one a day/week)
+            // so we iterate through all actors and we delete the ones which meets conditions of being certain time old
+        }
     }
 }
