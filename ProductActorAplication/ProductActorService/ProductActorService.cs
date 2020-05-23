@@ -8,6 +8,7 @@ using Microsoft.ServiceFabric.Actors.Runtime;
 using Microsoft.ServiceFabric.Actors.Client;
 using ProductActorService.Interfaces;
 using Contracts;
+using System.IO;
 
 namespace ProductActorService
 {
@@ -65,6 +66,25 @@ namespace ProductActorService
 
         protected override Task OnActivateAsync()
         {
+            var dbPort = Environment.GetEnvironmentVariable("DbPort");
+
+            
+            var dbConfig = this.ActorService.Context
+                .CodePackageActivationContext
+                .GetConfigurationPackageObject("Config")
+                .Settings
+                .Sections["Database"]
+                .Parameters["DbConfig"]
+                .Value;
+            
+            
+            var dataPackage = this.ActorService.Context.CodePackageActivationContext.GetDataPackageObject("Data");
+
+            var dataPath = Path.Combine(dataPackage.Path, "test.csv");
+
+            var contents = File.ReadAllText(dataPath);
+            
+
             this.RegisterReminderAsync("TaskReminder", null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(15)); // register reminder
 
             ActorEventSource.Current.ActorMessage(actor: this, message: "Actor activated.");

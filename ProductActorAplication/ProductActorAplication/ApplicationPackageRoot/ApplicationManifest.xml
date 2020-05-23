@@ -6,6 +6,7 @@
     <Parameter Name="ProductActorServiceActorService_PartitionCount" DefaultValue="10" />
     <Parameter Name="ProductActorServiceActorService_MinReplicaSetSize" DefaultValue="3" />
     <Parameter Name="ProductActorServiceActorService_TargetReplicaSetSize" DefaultValue="3" />
+    <Parameter Name="DbConfig" DefaultValue="" />
   </Parameters>
   <!-- Import the ServiceManifest from the ServicePackage. The ServiceManifestName and ServiceManifestVersion 
        should match the Name and Version attributes of the ServiceManifest element defined in the 
@@ -19,6 +20,15 @@
   </ServiceManifestImport>
   <ServiceManifestImport>
     <ServiceManifestRef ServiceManifestName="ProductActorServicePkg" ServiceManifestVersion="1.0.0" />
+    <ConfigOverrides>
+      <ConfigOverride Name="Config">
+        <Settings>
+          <Section Name="Database">
+            <Parameter Name="DbConfig" Value="[DbConfig]" />
+          </Section>
+        </Settings>
+      </ConfigOverride>
+    </ConfigOverrides>
   </ServiceManifestImport>
   <DefaultServices>
     <Service Name="ProductAPI" ServicePackageActivationMode="ExclusiveProcess">

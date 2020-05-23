@@ -21,4 +21,10 @@
     <ProjectReference Include="..\ProductActorService.Interfaces\ProductActorService.Interfaces.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="PackageRoot\Data\test.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
